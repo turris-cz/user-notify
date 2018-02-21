@@ -1,0 +1,36 @@
+# Strings for various notifications from router.
+# Copyright (C) 2018 CZ.NIC
+# This file is distributed under the same license as the user_notify package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: user-notify\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-20 20:57+0100\n"
+"PO-Revision-Date: 2018-02-20 21:18+0100\n"
+"Last-Translator: Michal Hrusecky <michal.hrusecky@nic.cz>\n"
+"Language-Team: Czech\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: generate-lxc.sh:38
+msgid "Distribution %1 version %2 was just installed as a container."
+msgstr "Distribuce %1 ve verzi %2 byla nainstalována."
+
+#: generate-lxc.sh:40
+msgid ""
+"Content of the tarballs is provided by third party, thus there is no "
+"warranty of any kind nor support from Turris team."
+msgstr ""
+"Obsah instalovaných archivů je poskytován třetí stranou a není na něj tedy "
+"poskytována žádná záruka či podpora ze strany Turris týmu."
+
+#: generate-lxc.sh:42
+msgid ""
+"Do not use containers on internal flash, they can wear it down really fast!!!"
+msgstr ""
+"Nepoužívejte kontejnery na integrované flash paměti, mohou ji velmi rychle "
+"opotřebovat!!!"

@@ -1,0 +1,26 @@
+# Strings for various notifications from router.
+# Copyright (C) 2018 CZ.NIC
+# This file is distributed under the same license as the user_notify package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: user-notify\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-20 20:57+0100\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: generate-lxc.sh:38
+msgid "Distribution %1 version %2 was just installed as a container."
+msgstr ""
+
+#: generate-lxc.sh:40
+msgid "Content of the tarballs is provided by third party, thus there is no warranty of any kind nor support from Turris team."
+msgstr ""
+
+#: generate-lxc.sh:42
+msgid "Do not use containers on internal flash, they can wear it down really fast!!!"
+msgstr ""
