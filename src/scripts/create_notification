@@ -71,3 +71,7 @@ mv "$base_dir/tmp.$msg_id" "$base_dir/$msg_id"
 if $trigger ; then
 	exec notifier -d "$base_dir"
 fi
+
+if [ -x /usr/bin/foris-notify-wrapper ]; then
+	/usr/bin/foris-notify-wrapper -m router_notifications -a create "{\"severity\": \"$severity\", \"id\": \"$msg_id\"}"
+fi
