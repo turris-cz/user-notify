@@ -154,7 +154,7 @@ compose_message() {
 				restart|error|update)
 					msg_suffix="${msg_severity}s"
 					;;
-				news|test)
+				news)
 					msg_suffix="$msg_severity"
 					;;
 				*) echo "Unknown severity: $msg_severity"
@@ -170,11 +170,6 @@ compose_message() {
 		schedule_restart "$msg_file.restarts"
 	fi
 
-	if [ -f "$msg_file.test" ]; then
-		cat "$locker_stamp/stamps.test" >> "$locker_stamp/stamps"
-
-		cat "$msg_file.test" >> "$msg_file.tmp"
-	fi
 	if [ -f "$msg_file.restarts" ]; then
 		cat "$locker_stamp/stamps.restarts" >> "$locker_stamp/stamps"
 
