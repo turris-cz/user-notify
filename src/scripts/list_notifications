@@ -50,7 +50,7 @@ export_notification() {
 }
 
 
-[ ! -e "$base_dir" ] && echo "[]" && exit  # dir doesn't exist
+[ ! -e "$base_dir" ] && echo '{"notifications": []}' && exit  # dir doesn't exist
 
 json_init
 json_add_array notifications
