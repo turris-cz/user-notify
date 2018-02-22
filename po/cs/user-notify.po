@@ -16,6 +16,45 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
+#: format_and_set_srv.sh:21
+msgid ""
+"Another formatting job currently in progress, not switching to new drive."
+msgstr ""
+"Aktuálně probíhá formátování disku, požadavek na změnu disku je proto "
+"ignorován."
+
+#: format_and_set_srv.sh:38
+msgid "Formatting drive failed, try unpluging it and repluging it in again."
+msgstr "Formátování disku selhalo, zkuste ho odpojit a znovu připojit."
+
+#: format_and_set_srv.sh:41
+msgid "Can't get UUID of your newly formatted drive."
+msgstr "Nemohu získat UUID nově zformátovaného disku."
+
+#: format_and_set_srv.sh:47
+msgid "Can't find your current srv location."
+msgstr "Nemohu nalézt kde se nachází vaše současné srv."
+
+#: format_and_set_srv.sh:54
+msgid ""
+"Your new disk for storing data has been setup successfully. All you need to "
+"do now is to reboot your router for changes to take effect. Be aware that if "
+"you have some local data stored on your current storage, those will get "
+"moved during reboot, so your next reboot might take quite some time."
+msgstr ""
+"Váš nový disk byl úspěšně nastaven. Vše co nyní potřebujete udělat "
+"jerestartovat váš router. Pokud už jste měli nějaká data v původním umístění,"
+"následující reboot může trvat dlouho jelikož se během reboootu budou "
+"datapřesouuvat a router naběhne teprve až budou všechna data přesunuta."
+
+#: srv.init:38
+msgid ""
+"Moving files failed, please check manually what went wrong and what files "
+"were left on your old drive."
+msgstr ""
+"Přesouvání dat selhalo. Zkontrolujte prosím ručně co se mohlo stát a co zbylo"
+"na starém disku."
+
 #: generate-lxc.sh:38
 msgid "Distribution %1 version %2 was just installed as a container."
 msgstr "Distribuce %1 ve verzi %2 byla nainstalována."
