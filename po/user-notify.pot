@@ -57,3 +57,7 @@ msgstr ""
 msgid ""
 "Do not use containers on internal flash, they can wear it down really fast!!!"
 msgstr ""
+
+#: foris/config/__init__.py:246
+msgid "This is a testing notification. Please ignore me."
+msgstr ""
