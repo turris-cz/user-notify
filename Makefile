@@ -2,7 +2,7 @@
 
 LANGS=$(shell ls po/*/user-notify.po)
 MLANGS=$(LANGS:.po=.mo)
-SCRIPTS=$(filter-out %.config %.cron README, $(shell ls src/scripts/*))
+SCRIPTS=$(filter-out %.config %.cron src/scripts/README, $(shell ls src/scripts/*))
 
 all: $(MLANGS)
 
