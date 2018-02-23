@@ -2,11 +2,13 @@
 
 base_folder=/tmp/user_notify
 
+mkdir -p "${base_folder}"
+
 export_ids=""
 while [ "$1" ] ; do
 	# Don't care about errors if the message already disappeared
 	if touch "$base_folder/$1/displayed" 2>/dev/null ; then
-		if [ -z "$export_ids"] ; then
+		if [ -z "$export_ids" ] ; then
 			export_ids="\"$1\""
 		else
 			export_ids="${export_ids}, \"$1\""
@@ -16,7 +18,11 @@ while [ "$1" ] ; do
 done
 
 if [ -x /usr/bin/foris-notify-wrapper -a -n "$export_ids" ]; then
-	/usr/bin/foris-notify-wrapper -m router_notifications -a mark_as_displayed "{\"ids\": [${export_ids}]}"
+	total=$(ls -1 "$base_folder"/*-*/severity 2>/dev/null | wc -l)
+	displayed=$(ls -1 "$base_folder"/*-*/displayed  2>/dev/null | wc -l)
+	active=$(($total - $displayed))
+	# run on background and close outputs to speed up cmd execution
+	/usr/bin/foris-notify-wrapper -m router_notifications -a mark_as_displayed "{\"ids\": [${export_ids}], \"new_count\": $active}" 1>/dev/null 2>&1 &
 fi
 
 exec user-notify-cleaner

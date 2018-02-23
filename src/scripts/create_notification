@@ -72,6 +72,12 @@ if $trigger ; then
 	exec notifier -d "$base_dir"
 fi
 
+
 if [ -x /usr/bin/foris-notify-wrapper ]; then
-	/usr/bin/foris-notify-wrapper -m router_notifications -a create "{\"severity\": \"$severity\", \"id\": \"$msg_id\"}"
+	# count messages based on their severity
+	total=$(ls -1 "$base_dir"/*-*/severity 2>/dev/null | wc -l)
+	displayed=$(ls -1 "$base_dir"/*-*/displayed  2>/dev/null | wc -l)
+	active=$(($total - $displayed))
+	# run on background and close outputs to speed up cmd execution
+	/usr/bin/foris-notify-wrapper -m router_notifications -a create "{\"severity\": \"$severity\", \"id\": \"$msg_id\", \"new_count\": $active}" 1>/dev/null 2>&1 &
 fi
