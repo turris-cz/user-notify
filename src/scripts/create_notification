@@ -56,7 +56,7 @@ mkdir -p "$base_dir"
 mkdir "$base_dir/tmp.$msg_id"
 echo "$severity" > "$base_dir/tmp.$msg_id/severity"
 if $compat ; then
-	if [ -x "$(which gettext_filter > /dev/null 2>&1)" ]; then
+	if [ -x /usr/bin/gettext_filter ]; then
 		echo "$message_cs" | gettext_filter > "$base_dir/tmp.$msg_id/message"
 	else
 		echo "$message_cs" > "$base_dir/tmp.$msg_id/message"
