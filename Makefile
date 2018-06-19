@@ -15,14 +15,14 @@ update-langs:
 install: install_langs install_scripts install_aux
 
 install_aux:
-	install -D src/user_notify.cron $(DESTDIR)/etc/cron.d/user_notify.cron
-	install -D src/user_notify.config $(DESTDIR)/etc/config/user_notify
+	install -D -m 0644 src/user_notify.cron $(DESTDIR)/etc/cron.d/user_notify.cron
+	install -D -m 0644 src/user_notify.config $(DESTDIR)/etc/config/user_notify
 
 install_scripts:
 	install -d $(DESTDIR)/usr/bin
-	install $(SCRIPTS) $(DESTDIR)/usr/bin
+	install -m 0755 $(SCRIPTS) $(DESTDIR)/usr/bin
 
 install_langs: $(MLANGS)
 	$(foreach mlang, $(MLANGS), \
-	install -D $(mlang) $(DESTDIR)/usr/share/locale/$(patsubst po/%/user-notify.mo,%/LC_MESSAGES/user-notify.mo,$(mlang));\
+	install -D -m 0644 $(mlang) $(DESTDIR)/usr/share/locale/$(patsubst po/%/user-notify.mo,%/LC_MESSAGES/user-notify.mo,$(mlang));\
 	)
