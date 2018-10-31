@@ -15,8 +15,8 @@ update-langs:
 install: install_langs install_scripts install_aux
 
 install_aux:
-	install -D -m 0644 src/user_notify.cron $(DESTDIR)/etc/cron.d/user_notify.cron
-	install -D -m 0644 src/user_notify.config $(DESTDIR)/etc/config/user_notify
+	install -D -m 0644 src/user-notify.cron $(DESTDIR)/etc/cron.d/user-notify.cron
+	install -D -m 0644 src/user-notify.config $(DESTDIR)/etc/config/user-notify
 
 install_scripts:
 	install -d $(DESTDIR)/usr/bin
