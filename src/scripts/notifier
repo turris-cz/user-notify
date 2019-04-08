@@ -4,7 +4,7 @@ base_folder=/tmp/user_notify
 date_cmd="/bin/busybox date"
 default_lang="en"
 
-if [ "$1" = "-d" ] ; then
+if [ "$1" = "-d" ]; then
 	base_folder="$2"
 	shift 2
 fi
@@ -21,20 +21,22 @@ mail_to=`uci -q get user_notify.smtp.to`
 mail_from=`uci -q get user_notify.smtp.from`
 lang="$(uci -q get foris.settings.lang || echo $default_lang)" # Auto-detect from system configuration somehow?
 
+
 create_msmtp_config() {
 	local turris_smtp=`uci -q get user_notify.smtp.use_turris_smtp`
 
 	echo "account notifier" > "$msmtp_cfg_file"
-	
+
 	if [ -n "$turris_smtp" ] && [ "$turris_smtp" = "1" ]; then
-	   use_turris_smtp 
+		use_turris_smtp
 	else
-	    parse_user_server_setting
+		parse_user_server_setting
 	fi
 
 	echo "timeout 5" >> "$msmtp_cfg_file"
 	echo "account default: notifier" >> "$msmtp_cfg_file"
 }
+
 
 use_turris_smtp() {
 	mail_from="$(uci -q get user_notify.smtp.sender_name | cut -d '@' -f1)@notify.turris.cz"
@@ -51,12 +53,12 @@ use_turris_smtp() {
 	echo "port $port" >> "$msmtp_cfg_file"
 	echo "tls on" >> "$msmtp_cfg_file"
 	echo "tls_certcheck off" >> "$msmtp_cfg_file"
-	echo "tls_starttls off" >> "$msmtp_cfg_file"	  
+	echo "tls_starttls off" >> "$msmtp_cfg_file"
 	echo "auth on" >> "$msmtp_cfg_file"
 	echo "user $username" >> "$msmtp_cfg_file"
 	echo "password $password" >> "$msmtp_cfg_file"
-
 }
+
 
 parse_user_server_setting() {
 	local username=`uci -q get user_notify.smtp.username`
@@ -76,11 +78,11 @@ parse_user_server_setting() {
 	elif [ "$security" = "starttls" ] ; then
 		echo "tls on" >> "$msmtp_cfg_file"
 		echo "tls_certcheck off" >> "$msmtp_cfg_file"
-		echo "tls_starttls on" >> "$msmtp_cfg_file"	  
+		echo "tls_starttls on" >> "$msmtp_cfg_file"
 	else
 		echo "tls off" >> "$msmtp_cfg_file"
 	fi
-	
+
 	if [ -n "$username" ] && [ -n "$password" ]; then
 		echo "auth on" >> "$msmtp_cfg_file"
 		echo "user $username" >> "$msmtp_cfg_file"
@@ -90,8 +92,9 @@ parse_user_server_setting() {
 	fi
 }
 
+
 schedule_restart() {
-	local max_delay=10 
+	local max_delay=10
 	local delay=`uci -q get user_notify.reboot.delay`
 	local time=`uci -q get user_notify.reboot.time | tr -d ':'`
 	local curr_time=`$date_cmd +"%H%M"`
@@ -115,13 +118,14 @@ schedule_restart() {
 	fi
 }
 
+
 compose_message() {
 	rm -rf "$msg_file"* > /dev/null 2>&1 || true
 	rm -rf "$locker_stamp/stamps"* > /dev/null 2>&1 || true
 
 	local severity=`uci -q get user_notify.notifications.severity`
 	local news=`uci -q get user_notify.notifications.news`
-	
+
 	local curr_date=`$date_cmd -R`
 	local date_time=`$date_cmd +'%y%m%d.%H%M%S'`
 	local rand=`tr -dc A-Za-z0-9 < /dev/urandom 2>/dev/null | head -c8`
@@ -212,8 +216,8 @@ compose_message() {
 		echo -e "Subject: $mail_subject\n" >> "$msg_file"
 		cat $msg_file.tmp >> "$msg_file"
 	fi
-
 }
+
 
 lock() {
 	# Try to acquire the lock. But only for a limited amount of time
@@ -229,15 +233,18 @@ lock() {
 	exit 1
 }
 
+
 unlock() {
 	rm -rf "$1"
 }
+
 
 mark_msgs() {
 	for msg in `cat "$locker_stamp/stamps"`; do
 		touch "$base_folder/$msg/$mail_stamp"
 	done
 }
+
 
 send_mail() {
 	lock "$locker_stamp"
@@ -270,6 +277,7 @@ send_mail() {
 
 	unlock "$locker_stamp"
 }
+
 
 send_mail
 
