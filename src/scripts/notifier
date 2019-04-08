@@ -52,8 +52,9 @@ use_turris_smtp() {
 	echo "host $server" >> "$msmtp_cfg_file"
 	echo "port $port" >> "$msmtp_cfg_file"
 	echo "tls on" >> "$msmtp_cfg_file"
-	echo "tls_certcheck off" >> "$msmtp_cfg_file"
 	echo "tls_starttls off" >> "$msmtp_cfg_file"
+	echo "tls_certcheck on" >> "$msmtp_cfg_file"
+	echo "tls_trust_file /etc/ssl/certs/ca-certificates.crt" >> "$msmtp_cfg_file"
 	echo "auth on" >> "$msmtp_cfg_file"
 	echo "user $username" >> "$msmtp_cfg_file"
 	echo "password $password" >> "$msmtp_cfg_file"
@@ -73,12 +74,14 @@ parse_user_server_setting() {
 
 	if [ "$security" = "ssl" ]; then
 		echo "tls on" >> "$msmtp_cfg_file"
-		echo "tls_certcheck off" >> "$msmtp_cfg_file"
 		echo "tls_starttls off" >> "$msmtp_cfg_file"
+		echo "tls_certcheck on" >> "$msmtp_cfg_file"
+		echo "tls_trust_file /etc/ssl/certs/ca-certificates.crt" >> "$msmtp_cfg_file"
 	elif [ "$security" = "starttls" ] ; then
 		echo "tls on" >> "$msmtp_cfg_file"
-		echo "tls_certcheck off" >> "$msmtp_cfg_file"
 		echo "tls_starttls on" >> "$msmtp_cfg_file"
+		echo "tls_certcheck on" >> "$msmtp_cfg_file"
+		echo "tls_trust_file /etc/ssl/certs/ca-certificates.crt" >> "$msmtp_cfg_file"
 	else
 		echo "tls off" >> "$msmtp_cfg_file"
 	fi
