@@ -40,10 +40,11 @@ create_msmtp_config() {
 
 use_turris_smtp() {
 	mail_from="$(uci -q get user_notify.smtp.sender_name | cut -d '@' -f1)@notify.turris.cz"
-	local username=`atsha204cmd serial-number`
-	local password=`echo "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef" \
-			| atsha204cmd challenge-response \
-			| awk '{print tolower($0)}'`
+	local username=$(crypto-wrapper serial-number)
+	local password=$(
+			crypto-wrapper sign-hash "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef" \
+					| awk '{print tolower($0)}'
+	)
 
 	local server="smtp.turris.cz"
 	local port="465"
