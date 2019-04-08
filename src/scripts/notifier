@@ -39,7 +39,9 @@ create_msmtp_config() {
 
 
 use_turris_smtp() {
-	mail_from="$(uci -q get user_notify.smtp.sender_name | cut -d '@' -f1)@notify.turris.cz"
+	# force notify.turris.cz e-mail domain
+	local sender_name=$(uci -q get user_notify.smtp.sender_name | cut -d '@' -f1)
+	mail_from="${sender_name:-turris}@notify.turris.cz"
 	local username=$(crypto-wrapper serial-number)
 	local password=$(
 			crypto-wrapper sign-hash "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef" \
