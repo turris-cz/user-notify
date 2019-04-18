@@ -266,7 +266,6 @@ send_mail() {
 	lock
 	trap 'unlock' EXIT ABRT QUIT TERM HUP INT QUIT ILL TRAP BUS FPE SEGV PIPE ALRM
 
-	create_msmtp_config
 	compose_message
 
 	if [ ! -f "$msg_file" ]; then
@@ -277,18 +276,15 @@ send_mail() {
 
 	if [ "$smtp_enabled" -eq 0 ]; then
 		echo "User notifications are not enabled."
-		mark_msgs
 	else
-		cat "$msg_file" | msmtp -C "$msmtp_cfg_file" -t
-		local err_lvl=$?
-
-		if [ "$err_lvl" -eq 0 ]; then
-			mark_msgs
-		else
-			exit "$err_lvl"
-		fi
+		create_msmtp_config
+		msmtp -C "$msmtp_cfg_file" -t < "$msg_file" || {
+			echo "notifier: msmtp has failed to send e-mail notification" >&2
+			exit 2
+		}
 	fi
 
+	mark_msgs
 	unlock
 }
 
