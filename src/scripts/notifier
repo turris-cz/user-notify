@@ -17,6 +17,11 @@ msmtp_cfg_file="$locker_stamp/msmtp.cfg.$$"
 mail_stamp="sent_by_email"
 
 
+certgen_executable='/usr/libexec/sentinel_certgen.py'
+mailpass_certapi_hostname='sentinel.turris.cz'
+mailpass_file='/etc/sentinel/mailpass'
+
+
 smtp_enabled=$(uci -q get user_notify.smtp.enable)
 mail_to=$(uci -q get user_notify.smtp.to)
 
@@ -34,7 +39,40 @@ fi
 lang=$(uci -q get foris.settings.lang || echo $default_lang)
 
 
+get_turris_password() {
+	[ -f "$mailpass_file" ] || {
+		echo "notifier: Error: Mailpass file does not exist" >&2
+		return 1
+	}
+
+	cat "$mailpass_file"
+}
+
+
+generate_turris_password() {
+	# return if Certgen is not present
+	if ! [ -f "$certgen_executable" ]; then
+		# if the password exists, report warning only
+		echo "notifier: Warning: Could not find Certgen executable" >&2
+		get_turris_password > /dev/null
+		# propagate return code
+		return
+	fi
+
+	python3 "$certgen_executable" mailpass \
+			--cert-api-hostname "$mailpass_certapi_hostname" \
+			--filename "$mailpass_file" > /dev/null || {
+		echo "notifier: Error: Certgen has failed to generate turris password" >&2
+		return 1
+	}
+}
+
+
 create_msmtp_config() {
+	if [ "$turris_smtp" = '1' ]; then
+		generate_turris_password || exit 3
+	fi
+
 	# create configuration file
 	{
 		echo "account notifier"
@@ -52,11 +90,9 @@ create_msmtp_config() {
 
 
 get_turris_smtp_settings() {
-	local username=$(crypto-wrapper serial-number)
-	local password=$(
-			crypto-wrapper sign-hash "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef" \
-					| awk '{print tolower($0)}'
-	)
+	local username password
+	username=$(crypto-wrapper serial-number) || exit 3
+	password=$(get_turris_password) || exit 3
 
 	local server="smtp.turris.cz"
 	local port="465"
