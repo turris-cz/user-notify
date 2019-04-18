@@ -240,7 +240,7 @@ lock() {
 	# (15 minutes) to prevent too many waiting notifiers to gather in
 	# case something bad happens. It is started every 5 minutes anyway.
 	for i in `seq 1 900` ; do
-		if mkdir "$1" >/dev/null 2>&1 ; then
+		if mkdir "$locker_stamp" >/dev/null 2>&1 ; then
 			return
 		fi
 		sleep 1
@@ -251,7 +251,7 @@ lock() {
 
 
 unlock() {
-	rm -rf "$1"
+	rm -rf "$locker_stamp"
 }
 
 
@@ -263,22 +263,21 @@ mark_msgs() {
 
 
 send_mail() {
-	lock "$locker_stamp"
-	trap 'unlock "$locker_stamp"' EXIT ABRT QUIT TERM HUP INT QUIT ILL TRAP BUS FPE SEGV PIPE ALRM
+	lock
+	trap 'unlock' EXIT ABRT QUIT TERM HUP INT QUIT ILL TRAP BUS FPE SEGV PIPE ALRM
 
 	create_msmtp_config
 	compose_message
 
 	if [ ! -f "$msg_file" ]; then
 		[ -f "$locker_stamp/stamps" ] && mark_msgs
-		unlock "$locker_stamp"
 		echo "There is no message to send."
 		exit 0
 	fi
 
 	if [ "$smtp_enabled" -eq 0 ]; then
-		mark_msgs
 		echo "User notifications are not enabled."
+		mark_msgs
 	else
 		cat "$msg_file" | msmtp -C "$msmtp_cfg_file" -t
 		local err_lvl=$?
@@ -286,12 +285,11 @@ send_mail() {
 		if [ "$err_lvl" -eq 0 ]; then
 			mark_msgs
 		else
-			unlock "$locker_stamp"
 			exit "$err_lvl"
 		fi
 	fi
 
-	unlock "$locker_stamp"
+	unlock
 }
 
 
