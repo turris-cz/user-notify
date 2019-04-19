@@ -90,8 +90,9 @@ create_msmtp_config() {
 
 
 get_turris_smtp_settings() {
-	local username password
-	username=$(crypto-wrapper serial-number) || exit 3
+	local sn username password
+	sn=$(crypto-wrapper serial-number) || exit 3
+	username="${sn}@notify.turris.cz"
 	password=$(get_turris_password) || exit 3
 
 	local server="smtp.turris.cz"
