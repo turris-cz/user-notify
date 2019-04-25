@@ -16,8 +16,9 @@ msg_file="$locker_stamp/msg.mail"
 msmtp_cfg_file="$locker_stamp/msmtp.cfg.$$"
 mail_stamp="sent_by_email"
 
-smtp_enabled=`uci -q get user_notify.smtp.enable`
-mail_to=`uci -q get user_notify.smtp.to`
+
+smtp_enabled=$(uci -q get user_notify.smtp.enable)
+mail_to=$(uci -q get user_notify.smtp.to)
 
 # set default value to 0 if not defined as well
 turris_smtp=$(uci -q get user_notify.smtp.use_turris_smtp)
@@ -29,7 +30,8 @@ else
 	mail_from=$(uci -q get user_notify.smtp.from)
 fi
 
-lang="$(uci -q get foris.settings.lang || echo $default_lang)" # Auto-detect from system configuration somehow?
+# Auto-detect from system configuration somehow?
+lang=$(uci -q get foris.settings.lang || echo $default_lang)
 
 
 create_msmtp_config() {
