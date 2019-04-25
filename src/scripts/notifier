@@ -18,18 +18,26 @@ mail_stamp="sent_by_email"
 
 smtp_enabled=`uci -q get user_notify.smtp.enable`
 mail_to=`uci -q get user_notify.smtp.to`
-mail_from=`uci -q get user_notify.smtp.from`
+
+# set default value to 0 if not defined as well
+turris_smtp=$(uci -q get user_notify.smtp.use_turris_smtp)
+if [ "${turris_smtp:=0}" = '1' ]; then
+	# force notify.turris.cz e-mail domain
+	sender_name=$(uci -q get user_notify.smtp.sender_name | cut -d '@' -f1)
+	mail_from="${sender_name:-turris}@notify.turris.cz"
+else
+	mail_from=$(uci -q get user_notify.smtp.from)
+fi
+
 lang="$(uci -q get foris.settings.lang || echo $default_lang)" # Auto-detect from system configuration somehow?
 
 
 create_msmtp_config() {
-	local turris_smtp=`uci -q get user_notify.smtp.use_turris_smtp`
-
 	# create configuration file
 	{
 		echo "account notifier"
 
-		if [ -n "$turris_smtp" -a "$turris_smtp" = "1" ]; then
+		if [ "$turris_smtp" = "1" ]; then
 			get_turris_smtp_settings
 		else
 			get_user_server_settings
@@ -42,9 +50,6 @@ create_msmtp_config() {
 
 
 get_turris_smtp_settings() {
-	# force notify.turris.cz e-mail domain
-	local sender_name=$(uci -q get user_notify.smtp.sender_name | cut -d '@' -f1)
-	mail_from="${sender_name:-turris}@notify.turris.cz"
 	local username=$(crypto-wrapper serial-number)
 	local password=$(
 			crypto-wrapper sign-hash "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef" \
