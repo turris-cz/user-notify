@@ -17,6 +17,7 @@ msmtp_cfg_file="$locker_stamp/msmtp.cfg.$$"
 mail_stamp="sent_by_email"
 
 
+turris_email_domain='notify.turris.cz'
 certgen_executable='/usr/libexec/sentinel_certgen.py'
 mailpass_certapi_hostname='sentinel.turris.cz'
 mailpass_file='/etc/sentinel/mailpass'
@@ -28,9 +29,9 @@ mail_to=$(uci -q get user_notify.smtp.to)
 # set default value to 0 if not defined as well
 turris_smtp=$(uci -q get user_notify.smtp.use_turris_smtp)
 if [ "${turris_smtp:=0}" = '1' ]; then
-	# force notify.turris.cz e-mail domain
+	# force turris e-mail domain
 	sender_name=$(uci -q get user_notify.smtp.sender_name | cut -d '@' -f1)
-	mail_from="${sender_name:-turris}@notify.turris.cz"
+	mail_from="${sender_name:-turris}@${turris_email_domain}"
 else
 	mail_from=$(uci -q get user_notify.smtp.from)
 fi
@@ -92,7 +93,7 @@ create_msmtp_config() {
 get_turris_smtp_settings() {
 	local sn username password
 	sn=$(crypto-wrapper serial-number) || exit 3
-	username="${sn}@notify.turris.cz"
+	username="${sn}@${turris_email_domain}"
 	password=$(get_turris_password) || exit 3
 
 	local server="smtp.turris.cz"
