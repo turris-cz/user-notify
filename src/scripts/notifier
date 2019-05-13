@@ -53,17 +53,14 @@ get_turris_password() {
 generate_turris_password() {
 	# return if Certgen is not present
 	if ! [ -f "$certgen_executable" ]; then
-		# if the password exists, report warning only
 		echo "notifier: Warning: Could not find Certgen executable" >&2
-		get_turris_password > /dev/null
-		# propagate return code
-		return
+		return 1
 	fi
 
 	python3 "$certgen_executable" mailpass \
 			--cert-api-hostname "$mailpass_certapi_hostname" \
 			--filename "$mailpass_file" > /dev/null || {
-		echo "notifier: Error: Certgen has failed to generate turris password" >&2
+		echo "notifier: Warning: Certgen has failed to generate turris password" >&2
 		return 1
 	}
 }
@@ -71,7 +68,10 @@ generate_turris_password() {
 
 create_msmtp_config() {
 	if [ "$turris_smtp" = '1' ]; then
-		generate_turris_password || exit 3
+		generate_turris_password || {
+			# if it fails and password exists, report warning only
+			get_turris_password > /dev/null || exit 3
+		}
 	fi
 
 	# create configuration file
