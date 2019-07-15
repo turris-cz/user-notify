@@ -50,7 +50,7 @@ get_turris_password() {
 
 
 generate_turris_password() {
-	sentinel_certgen mailpass \
+	sentinel-certgen mailpass \
 			--cert-api-hostname "$mailpass_certapi_hostname" \
 			--filename "$mailpass_file" > /dev/null || {
 		echo "notifier: Warning: Certgen has failed to generate turris password" >&2
