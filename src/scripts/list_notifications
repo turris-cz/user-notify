@@ -4,7 +4,7 @@
 
 set -e
 
-if [ "$1" == "-n" ] ; then
+if [ "$1" = "-n" ] ; then
 	interactive_param=""
 	shift
 else
@@ -29,7 +29,7 @@ export_notification() {
 	# parse messages
 
 	# special treatment for single language messages (considered as english)
-	if [ -e "$dir_path"/message ]; then
+	if [ -f "$dir_path"/message ]; then
 		local default_en_msg="$(cat "$dir_path"/message)"
 	fi
 
@@ -37,14 +37,14 @@ export_notification() {
 	json_add_object messages
 	for filepath in "$dir_path"/message_?? ; do
 		[ ! -e "$filepath" ] && break
-		local lang="$(basename ${filepath} | tail -c 3)"
-		if [ $lang == en ]; then
+		local lang="$(basename "$filepath" | tail -c 3)"
+		if [ "$lang" = "en" ]; then
 			en_used="y"
 		fi
 		json_add_string "$lang" "$(cat "$filepath")"
 	done
-	if [ ${en_used} == "n" -a -n "${default_en_msg}" ]; then
-		json_add_string en "${default_en_msg}"
+	if [ "$en_used" = "n" ]; then
+		json_add_string en "${default_en_msg:-}"
 	fi
 	json_close_object
 }
