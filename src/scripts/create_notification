@@ -94,29 +94,27 @@ else
 fi
 
 
-# This should be unique
+# unique message id
 msg_id="$(date '+%s')-$$"
-
-if [ "$compat" = 'false' ] ; then
-	export LANG="$(uci -q get foris.settings.lang)"
-	export LANGUAGE="$LANG"
-	[ -n "${GETTEXT_DOMAIN:-}" ] || export GETTEXT_DOMAIN="user-notify"
-fi
-
-
 mkdir -p "$base_dir"
 mkdir "$base_dir/tmp.$msg_id"
 
 echo "$severity" > "$base_dir/tmp.$msg_id/severity"
-if [ "$compat" = 'false' ] ; then
+
+if [ "$compat" = 'true' ] ; then
+	echo "$message_cs" > "$base_dir/tmp.$msg_id/message_cs"
+	echo "$message_en" > "$base_dir/tmp.$msg_id/message_en"
+
+else
+	export LANG="$(uci -q get foris.settings.lang)"
+	export LANGUAGE="$LANG"
+	[ -n "${GETTEXT_DOMAIN:-}" ] || export GETTEXT_DOMAIN="user-notify"
+
 	if which gettext_filter > /dev/null; then
 		echo "$message" | gettext_filter > "$base_dir/tmp.$msg_id/message"
 	else
 		echo "$message" > "$base_dir/tmp.$msg_id/message"
 	fi
-else
-	echo "$message_cs" > "$base_dir/tmp.$msg_id/message_cs"
-	echo "$message_en" > "$base_dir/tmp.$msg_id/message_en"
 fi
 
 mv "$base_dir/tmp.$msg_id" "$base_dir/$msg_id"
