@@ -1,14 +1,25 @@
 #!/bin/sh
+base_dir='/tmp/user_notify'
+trigger='false'
 
-base_dir=/tmp/user_notify
+SCRIPTNAME="$(basename "$0")"
+USAGE="Usage:
+    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'msg_cz' 'msg_en'
 
-usage() {
-	echo "This program serves for creating messages which will be send to the user." >&2
-	echo "Usage:" >&2
-	echo -e "\t $0 -s [restart,error,update,news] 'Czech text of the message' 'English text of the message'" >&2
-}
+    Create Foris notification
 
-trigger=false
+    Arguments:
+        -t      Send notification immediately (triggers notifier script)
+        -b base_dir
+                Directory for notifications (defaults to '$base_dir')
+        -s (restart|error|update|news)
+                Type of a notification message
+        msg_cz
+                Notification text in Czech
+        msg_en
+                Notification text in English
+"
+
 
 if [ "$1" = -t ] ; then
 	trigger=true
@@ -23,7 +34,7 @@ fi
 if [ $# -eq 3 ]; then
 	compat=true
 elif [ $# -ne 4 ]; then
-	usage
+	echo "$USAGE" >&2
 	exit 1
 else
 	compat=false
@@ -33,11 +44,11 @@ if [ "$1" = "-s" ]; then
 	if [ "$2" = "restart" ] || [ "$2" = "error" ] || [ "$2" = "update" ] || [ "$2" = "news" ] ; then
 		severity="$2"
 	else
-		usage
+		echo "$USAGE" >&2
 		exit 1
 	fi
 else
-	usage
+	echo "$USAGE" >&2
 	exit 1
 fi
 
