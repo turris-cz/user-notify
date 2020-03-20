@@ -1,4 +1,7 @@
 #!/bin/sh
+set -e
+set -u
+
 base_dir='/tmp/user_notify'
 trigger='false'
 
@@ -91,7 +94,7 @@ msg_id="$(date '+%s')-$$"
 if [ "$compat" = 'true' ] ; then
 	export LANG="$(uci -q get foris.settings.lang)"
 	export LANGUAGE="$LANG"
-	[ -n "$GETTEXT_DOMAIN" ] || export GETTEXT_DOMAIN="user-notify"
+	[ -n "${GETTEXT_DOMAIN:-}" ] || export GETTEXT_DOMAIN="user-notify"
 fi
 
 
