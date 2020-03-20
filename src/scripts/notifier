@@ -12,8 +12,9 @@ fi
 mkdir -p "$base_folder"
 
 locker_stamp="$base_folder/.locked"
-msg_file="$locker_stamp/msg.mail"
 msmtp_cfg_file="$locker_stamp/msmtp.cfg.$$"
+mail_file="$locker_stamp/msg.mail"
+mail_file_temp="$locker_stamp/msg.mail.tmp"
 mail_stamp="sent_by_email"
 
 
@@ -167,7 +168,7 @@ schedule_restart() {
 
 
 compose_message() {
-	rm -rf "$msg_file"* > /dev/null 2>&1 || true
+	rm -rf "$mail_file"* > /dev/null 2>&1 || true
 	rm -rf "$locker_stamp/stamps"* > /dev/null 2>&1 || true
 
 	local severity=`uci -q get user_notify.notifications.severity`
@@ -212,56 +213,56 @@ compose_message() {
 				;;
 			esac
 
-			echo -e "$(cat "$base_folder/$msg/message_$lang" || cat "$base_folder/$msg/message_$default_lang" || cat "$base_folder/$msg/message")\n" 2>/dev/null >> "$msg_file.$msg_suffix"
+			echo -e "$(cat "$base_folder/$msg/message_$lang" || cat "$base_folder/$msg/message_$default_lang" || cat "$base_folder/$msg/message")\n" 2>/dev/null >> "$mail_file.$msg_suffix"
 			echo "$msg" >> "$locker_stamp/stamps.$msg_suffix"
 		fi
 	done
 
-	if [ -f "$msg_file.restarts" ]; then
-		schedule_restart "$msg_file.restarts"
+	if [ -f "$mail_file.restarts" ]; then
+		schedule_restart "$mail_file.restarts"
 	fi
 
-	if [ -f "$msg_file.restarts" ]; then
+	if [ -f "$mail_file.restarts" ]; then
 		cat "$locker_stamp/stamps.restarts" >> "$locker_stamp/stamps"
 
 		if [ "$severity" -ge 1 ]; then
-			echo -e "##### $heading_restart #####" >> "$msg_file.tmp"
-			cat "$msg_file.restarts" >> "$msg_file.tmp"
+			echo -e "##### $heading_restart #####" >> "$mail_file_temp"
+			cat "$mail_file.restarts" >> "$mail_file_temp"
 		fi
 	fi
-	if [ -f "$msg_file.errors" ]; then
+	if [ -f "$mail_file.errors" ]; then
 		cat "$locker_stamp/stamps.errors" >> "$locker_stamp/stamps"
 
 		if [ "$severity" -ge 2 ]; then
-			echo -e "##### $heading_errors #####" >> "$msg_file.tmp"
-			cat "$msg_file.errors" >> "$msg_file.tmp"
+			echo -e "##### $heading_errors #####" >> "$mail_file_temp"
+			cat "$mail_file.errors" >> "$mail_file_temp"
 		fi
 	fi
-	if [ -f "$msg_file.news" ]; then
+	if [ -f "$mail_file.news" ]; then
 		cat "$locker_stamp/stamps.news" >> "$locker_stamp/stamps"
 
 		if [ "$news" -gt 0 ]; then
-			echo -e "##### $heading_news #####" >> "$msg_file.tmp"
-			cat "$msg_file.news" >> "$msg_file.tmp"
+			echo -e "##### $heading_news #####" >> "$mail_file_temp"
+			cat "$mail_file.news" >> "$mail_file_temp"
 		fi
 	fi
-	if [ -f "$msg_file.updates" ]; then
+	if [ -f "$mail_file.updates" ]; then
 		cat "$locker_stamp/stamps.updates" >> "$locker_stamp/stamps"
 
 		if [ "$severity" -ge 3 ]; then
-			echo -e "##### $heading_updates #####" >> "$msg_file.tmp"
-			cat "$msg_file.updates" >> "$msg_file.tmp"
+			echo -e "##### $heading_updates #####" >> "$mail_file_temp"
+			cat "$mail_file.updates" >> "$mail_file_temp"
 		fi
 	fi
 
-	if [ -f "$msg_file.tmp" ]; then
-		echo "To: $(echo $mail_to | sed 's/ /, /')" > "$msg_file"
-		echo "From: $mail_from" >> "$msg_file"
-		echo "Content-Type: text/plain; charset=UTF-8" >> "$msg_file"
-		echo "Date: $curr_date" >> "$msg_file"
-		echo "Message-ID: $msg_id" >> "$msg_file"
-		echo -e "Subject: $mail_subject\n" >> "$msg_file"
-		cat $msg_file.tmp >> "$msg_file"
+	if [ -f "$mail_file_temp" ]; then
+		echo "To: $(echo $mail_to | sed 's/ /, /')" > "$mail_file"
+		echo "From: $mail_from" >> "$mail_file"
+		echo "Content-Type: text/plain; charset=UTF-8" >> "$mail_file"
+		echo "Date: $curr_date" >> "$mail_file"
+		echo "Message-ID: $msg_id" >> "$mail_file"
+		echo -e "Subject: $mail_subject\n" >> "$mail_file"
+		cat "$mail_file_temp" >> "$mail_file"
 	fi
 }
 
@@ -299,7 +300,7 @@ send_mail() {
 
 	compose_message
 
-	if [ ! -f "$msg_file" ]; then
+	if [ ! -f "$mail_file" ]; then
 		[ -f "$locker_stamp/stamps" ] && mark_msgs
 		echo "There is no message to send."
 		exit 0
@@ -309,7 +310,7 @@ send_mail() {
 		echo "User notifications are not enabled."
 	else
 		create_msmtp_config
-		msmtp -C "$msmtp_cfg_file" -t < "$msg_file" || {
+		msmtp -C "$msmtp_cfg_file" -t < "$mail_file" || {
 			echo "notifier: msmtp has failed to send e-mail notification" >&2
 			exit 2
 		}
