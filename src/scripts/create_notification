@@ -88,7 +88,7 @@ fi
 # This should be unique
 msg_id="$(/bin/busybox date +%s)-$$"
 
-if $compat; then
+if [ "$compat" = 'true' ] ; then
 	export LANG="$(uci -q get foris.settings.lang)"
 	export LANGUAGE="$LANG"
 	[ -n "$GETTEXT_DOMAIN" ] || export GETTEXT_DOMAIN="user-notify"
@@ -97,7 +97,7 @@ fi
 mkdir -p "$base_dir"
 mkdir "$base_dir/tmp.$msg_id"
 echo "$severity" > "$base_dir/tmp.$msg_id/severity"
-if $compat ; then
+if [ "$compat" = 'true' ] ; then
 	if [ -x /usr/bin/gettext_filter ]; then
 		echo "$message" | gettext_filter > "$base_dir/tmp.$msg_id/message"
 	else
@@ -114,11 +114,11 @@ if [ -x /usr/bin/foris-notify-wrapper ]; then
 	# count messages based on their severity
 	total=$(ls -1 "$base_dir"/*-*/severity 2>/dev/null | wc -l)
 	displayed=$(ls -1 "$base_dir"/*-*/displayed  2>/dev/null | wc -l)
-	active=$(($total - $displayed))
+	active=$((total - displayed))
 	# run on background and close outputs to speed up cmd execution
 	/usr/bin/foris-notify-wrapper -m router_notifications -a create "{\"severity\": \"$severity\", \"id\": \"$msg_id\", \"new_count\": $active}" 1>/dev/null 2>&1 &
 fi
 
-if $trigger ; then
+if [ "$trigger" = 'true' ] ; then
 	exec notifier -d "$base_dir"
 fi
