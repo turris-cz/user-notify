@@ -194,28 +194,32 @@ compose_message() {
 		local heading_news="News announcements"
 	fi
 
-	local msg_list=`ls "$base_folder"`
-	for msg in $msg_list; do
+	local msg msg_dir msg_suffix msg_severity
+	for msg_dir in "$base_folder"/*; do
+		msg="${msg_dir##*/}"
+		# if not a message dir
+		[ -d "$msg_dir" ] || continue
+		[ -f "$msg_dir/severity" ] || continue
+		# if already sent
+		[ -f "$msg_dir/$mail_stamp" ] && continue
+
 		echo "Working on message: $msg"
-		[ -f "$base_folder/$msg/$mail_stamp" ] && continue
+		msg_severity=$(cat "$msg_dir/severity")
 
-		if [ -f "$base_folder/$msg/severity" ]; then
-			local msg_severity=`cat "$base_folder/$msg/severity"`
-
-			case "$msg_severity" in
-				restart|error|update)
-					msg_suffix="${msg_severity}s"
-					;;
-				news)
-					msg_suffix="$msg_severity"
-					;;
-				*) echo "Unknown severity: $msg_severity"
+		case "$msg_severity" in
+			restart|error|update)
+				msg_suffix="${msg_severity}s"
 				;;
-			esac
+			news)
+				msg_suffix="$msg_severity"
+				;;
+			*)
+				echo "Unknown severity: $msg_severity" >&2
+				;;
+		esac
 
-			echo -e "$(cat "$base_folder/$msg/message_$lang" || cat "$base_folder/$msg/message_$default_lang" || cat "$base_folder/$msg/message")\n" 2>/dev/null >> "$mail_file.$msg_suffix"
-			echo "$msg" >> "$locker_stamp/stamps.$msg_suffix"
-		fi
+		echo -e "$(cat "$msg_dir/message_$lang" || cat "$msg_dir/message_$default_lang" || cat "$msg_dir/message")\n" 2>/dev/null >> "$mail_file.$msg_suffix"
+		echo "$msg" >> "$locker_stamp/stamps.$msg_suffix"
 	done
 
 	if [ -f "$mail_file.restarts" ]; then
@@ -271,7 +275,7 @@ lock() {
 	# Try to acquire the lock. But only for a limited amount of time
 	# (15 minutes) to prevent too many waiting notifiers to gather in
 	# case something bad happens. It is started every 5 minutes anyway.
-	for i in `seq 1 900` ; do
+	for i in $(seq 1 900); do
 		if mkdir "$locker_stamp" >/dev/null 2>&1 ; then
 			return
 		fi
@@ -288,9 +292,10 @@ unlock() {
 
 
 mark_msgs() {
-	for msg in `cat "$locker_stamp/stamps"`; do
+	local msg
+	while read -r msg; do
 		touch "$base_folder/$msg/$mail_stamp"
-	done
+	done < "$locker_stamp/stamps"
 }
 
 
