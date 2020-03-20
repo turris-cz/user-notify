@@ -8,6 +8,7 @@ trigger='false'
 SCRIPTNAME="$(basename "$0")"
 USAGE="Usage:
     $SCRIPTNAME -h
+    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'message'
     $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'msg_cs' 'msg_en'"
 
 HELP="$USAGE
@@ -21,17 +22,21 @@ Arguments:
             Directory for notifications (defaults to '$base_dir')
     -s (restart|error|update|news)
             Type of a notification message
+    message
+            Notification text
     msg_cs
             Notification text in Czech
     msg_en
             Notification text in English
 
+    Please note 'msg_cs' and 'msg_en' is obsoleted, use 'message' only
+
 Examples:
     Create an information notification
-        $ create_notification -s news 'Ahoj světe!' 'Hello world!'
+        $ create_notification -s news 'Hello world!'
 
     Create and send testing notification immediately
-        $ create_notification -t -s error 'Toto je testovací notifikace' 'This is a testing notification'
+        $ create_notification -t -s error 'This is a testing notification'
 "
 
 
@@ -75,10 +80,11 @@ shift $((OPTIND-1))
 }
 
 if [ $# -eq 1 ]; then
-	compat='true'
+	compat='false'
 	message="$1"
 elif [ $# -eq 2 ]; then
-	compat='false'
+	echo "$SCRIPTNAME: Warning: Running in compatible mode! Use of cs message is obsoleted." >&2
+	compat='true'
 	message_cs="$1"
 	message_en="$2"
 else
@@ -91,7 +97,7 @@ fi
 # This should be unique
 msg_id="$(date '+%s')-$$"
 
-if [ "$compat" = 'true' ] ; then
+if [ "$compat" = 'false' ] ; then
 	export LANG="$(uci -q get foris.settings.lang)"
 	export LANGUAGE="$LANG"
 	[ -n "${GETTEXT_DOMAIN:-}" ] || export GETTEXT_DOMAIN="user-notify"
@@ -102,7 +108,7 @@ mkdir -p "$base_dir"
 mkdir "$base_dir/tmp.$msg_id"
 
 echo "$severity" > "$base_dir/tmp.$msg_id/severity"
-if [ "$compat" = 'true' ] ; then
+if [ "$compat" = 'false' ] ; then
 	if which gettext_filter > /dev/null; then
 		echo "$message" | gettext_filter > "$base_dir/tmp.$msg_id/message"
 	else
