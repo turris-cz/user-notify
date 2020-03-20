@@ -194,7 +194,7 @@ compose_message() {
 		local heading_news="News announcements"
 	fi
 
-	local msg msg_dir msg_suffix msg_severity
+	local msg msg_dir msg_suffix msg_severity msg_file
 	for msg_dir in "$base_folder"/*; do
 		msg="${msg_dir##*/}"
 		# if not a message dir
@@ -218,7 +218,21 @@ compose_message() {
 				;;
 		esac
 
-		echo -e "$(cat "$msg_dir/message_$lang" || cat "$msg_dir/message_$default_lang" || cat "$msg_dir/message")\n" 2>/dev/null >> "$mail_file.$msg_suffix"
+		if [ -f "$msg_dir/message_$lang" ]; then
+			msg_file="$msg_dir/message_$lang"
+		elif [ -f "$msg_dir/message_$default_lang" ]; then
+			msg_file="$msg_dir/message_$default_lang"
+		elif [ -f "$msg_dir/message" ]; then
+			msg_file="$msg_dir/message"
+		else
+			echo "Could not access a message for $msg" >&2
+		fi
+
+		[ -n "${msg_file:-}" ] && {
+			cat "$msg_file"
+			echo
+		} >> "$mail_file.$msg_suffix"
+
 		echo "$msg" >> "$locker_stamp/stamps.$msg_suffix"
 	done
 
