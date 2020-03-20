@@ -4,24 +4,41 @@ trigger='false'
 
 SCRIPTNAME="$(basename "$0")"
 USAGE="Usage:
-    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'msg_cs' 'msg_en'
+    $SCRIPTNAME -h
+    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'msg_cs' 'msg_en'"
+
+HELP="$USAGE
 
     Create Turris notification
 
-    Arguments:
-        -t      Send notification immediately (triggers notifier script)
-        -b base_dir
-                Directory for notifications (defaults to '$base_dir')
-        -s (restart|error|update|news)
-                Type of a notification message
-        msg_cs
-                Notification text in Czech
-        msg_en
-                Notification text in English
+Arguments:
+    -h      Print this help and exit
+    -t      Send notification immediately (triggers notifier script)
+    -b base_dir
+            Directory for notifications (defaults to '$base_dir')
+    -s (restart|error|update|news)
+            Type of a notification message
+    msg_cs
+            Notification text in Czech
+    msg_en
+            Notification text in English
+
+Examples:
+    Create an information notification
+        $ create_notification -s news 'Ahoj světe!' 'Hello world!'
+
+    Create and send testing notification immediately
+        $ create_notification -t -s error 'Toto je testovací notifikace' 'This is a testing notification'
 "
 
-while getopts "td:s:" OPT; do
+
+while getopts "htd:s:" OPT; do
 	case "$OPT" in
+		h)
+			echo "$HELP"
+			exit 0
+			;;
+
 		t)
 			trigger='true'
 			;;
