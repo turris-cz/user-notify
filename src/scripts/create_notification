@@ -4,9 +4,9 @@ trigger='false'
 
 SCRIPTNAME="$(basename "$0")"
 USAGE="Usage:
-    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'msg_cz' 'msg_en'
+    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'msg_cs' 'msg_en'
 
-    Create Foris notification
+    Create Turris notification
 
     Arguments:
         -t      Send notification immediately (triggers notifier script)
@@ -14,46 +14,60 @@ USAGE="Usage:
                 Directory for notifications (defaults to '$base_dir')
         -s (restart|error|update|news)
                 Type of a notification message
-        msg_cz
+        msg_cs
                 Notification text in Czech
         msg_en
                 Notification text in English
 "
 
+while getopts "td:s:" OPT; do
+	case "$OPT" in
+		t)
+			trigger='true'
+			;;
 
-if [ "$1" = -t ] ; then
-	trigger=true
-	shift
-fi
+		d)
+			base_dir="$OPTARG"
+			;;
 
-if [ "$1" = -d ] ; then
-	base_dir="$2"
-	shift 2
-fi
+		s)
+			severity="$OPTARG"
+			[ "$severity" = "restart" -o "$severity" = "error" -o "$severity" = "update" -o "$severity" = "news" ] || {
+				echo "$SCRIPTNAME: Unknown notification severity: $severity" >&2
+				echo "$USAGE" >&2
+				exit 1
+			}
+			;;
 
-if [ $# -eq 3 ]; then
-	compat=true
-elif [ $# -ne 4 ]; then
+		*)
+			# error message is reported by getopts
+			echo "$USAGE" >&2
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+[ -n "${severity:-}" ] || {
+	echo "$SCRIPTNAME: Severity must be specified" >&2
 	echo "$USAGE" >&2
 	exit 1
-else
-	compat=false
-fi
+}
 
-if [ "$1" = "-s" ]; then
-	if [ "$2" = "restart" ] || [ "$2" = "error" ] || [ "$2" = "update" ] || [ "$2" = "news" ] ; then
-		severity="$2"
-	else
-		echo "$USAGE" >&2
-		exit 1
-	fi
+if [ $# -eq 1 ]; then
+	compat='true'
+	message="$1"
+elif [ $# -eq 2 ]; then
+	compat='false'
+	message_cs="$1"
+	message_en="$2"
 else
+	echo "$SCRIPTNAME: Wrong number of arguments" >&2
 	echo "$USAGE" >&2
 	exit 1
 fi
 
-message_cs="$3"
-message_en="$4"
+
 # This should be unique
 msg_id="$(/bin/busybox date +%s)-$$"
 
@@ -68,9 +82,9 @@ mkdir "$base_dir/tmp.$msg_id"
 echo "$severity" > "$base_dir/tmp.$msg_id/severity"
 if $compat ; then
 	if [ -x /usr/bin/gettext_filter ]; then
-		echo "$message_cs" | gettext_filter > "$base_dir/tmp.$msg_id/message"
+		echo "$message" | gettext_filter > "$base_dir/tmp.$msg_id/message"
 	else
-		echo "$message_cs" > "$base_dir/tmp.$msg_id/message"
+		echo "$message" > "$base_dir/tmp.$msg_id/message"
 	fi
 else
 	echo "$message_cs" > "$base_dir/tmp.$msg_id/message_cs"
