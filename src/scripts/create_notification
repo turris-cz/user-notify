@@ -4,6 +4,7 @@ set -u
 
 base_dir='/tmp/user_notify'
 trigger='false'
+default_lang='en'
 
 SCRIPTNAME="$(basename "$0")"
 USAGE="Usage:
@@ -106,7 +107,7 @@ if [ "$compat" = 'true' ] ; then
 	echo "$message_en" > "$base_dir/tmp.$msg_id/message_en"
 
 else
-	export LANG="$(uci -q get foris.settings.lang)"
+	export LANG="$(uci -q get foris.settings.lang || echo "$default_lang")"
 	export LANGUAGE="$LANG"
 	[ -n "${GETTEXT_DOMAIN:-}" ] || export GETTEXT_DOMAIN="user-notify"
 
