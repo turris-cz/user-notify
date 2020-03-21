@@ -155,10 +155,10 @@ schedule_restart() {
 		delay=1
 	fi
 
-	local curr_date=`$date_cmd '+%y%m%d'`
-	local wanted_time="$(($curr_date + $delay))$time"
+	local curr_date=$($date_cmd '+%y%m%d')
+	local wanted_time=$($date_cmd '+%y%m%d%H%M' -d "$((curr_date + delay))$time")
 
-	echo "reboot" | at -t $($date_cmd +"%y%m%d%H%M" -d "$wanted_time")
+	echo "reboot" | at -t "$wanted_time" 2> /dev/null
 	if [ "$lang" = "cs" ]; then
 		echo -e "Zařízení bude automaticky restartováno dne $($date_cmd +'%d. %m. %Y v %H:%M' -d $wanted_time).\n" >> $1
 	else
