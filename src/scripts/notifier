@@ -143,15 +143,15 @@ get_user_server_settings() {
 
 schedule_restart() {
 	local max_delay=10
-	local delay=`uci -q get user_notify.reboot.delay`
-	local time=`uci -q get user_notify.reboot.time | tr -d ':'`
-	local curr_time=`$date_cmd +"%H%M"`
+	local delay=$(uci -q get user_notify.reboot.delay)
+	local time=$(uci -q get user_notify.reboot.time | tr -d ':')
+	local curr_time=$($date_cmd '+%H%M')
 
-	if [ $delay -gt $max_delay ]; then
+	if [ "$delay" -gt "$max_delay" ]; then
 		delay=$max_delay
-		uci set user_notify.reboot.delay=$max_delay
+		uci set "user_notify.reboot.delay=$max_delay"
 		uci commit
-	elif [ $delay -le 0 ] && [ $curr_time -ge $time ]; then
+	elif [ "$delay" -le 0 -a "$curr_time" -ge "$time" ]; then
 		delay=1
 	fi
 
@@ -160,9 +160,9 @@ schedule_restart() {
 
 	echo "reboot" | at -t "$wanted_time" 2> /dev/null
 	if [ "$lang" = "cs" ]; then
-		echo -e "Zařízení bude automaticky restartováno dne $($date_cmd +'%d. %m. %Y v %H:%M' -d $wanted_time).\n" >> $1
+		echo -e "Zařízení bude automaticky restartováno dne $($date_cmd '+%d. %m. %Y v %H:%M' -d "$wanted_time").\n" >> "$1"
 	else
-		echo -e "The device will be restarted automatically on $($date_cmd +'%A, %B %e at %I:%M %p' -d $wanted_time).\n" >> $1
+		echo -e "The device will be restarted automatically on $($date_cmd '+%A, %B %e at %I:%M %p' -d "$wanted_time").\n" >> "$1"
 	fi
 }
 
