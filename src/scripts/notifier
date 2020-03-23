@@ -167,6 +167,14 @@ schedule_restart() {
 }
 
 
+format_header() {
+    local header="$1"
+    local length="${#header}"
+    echo "$header"
+    printf '%*s\n' "$length" '' | tr ' ' '='
+}
+
+
 compose_message() {
 	rm -rf "$mail_file"* > /dev/null 2>&1 || true
 	rm -rf "$locker_stamp/stamps"* > /dev/null 2>&1 || true
@@ -244,7 +252,7 @@ compose_message() {
 		cat "$locker_stamp/stamps.restarts" >> "$locker_stamp/stamps"
 
 		if [ "$severity" -ge 1 ]; then
-			echo -e "##### $heading_restart #####" >> "$mail_file_temp"
+			format_header "$heading_restart" >> "$mail_file_temp"
 			cat "$mail_file.restarts" >> "$mail_file_temp"
 		fi
 	fi
@@ -252,7 +260,7 @@ compose_message() {
 		cat "$locker_stamp/stamps.errors" >> "$locker_stamp/stamps"
 
 		if [ "$severity" -ge 2 ]; then
-			echo -e "##### $heading_errors #####" >> "$mail_file_temp"
+			format_header "$heading_errors" >> "$mail_file_temp"
 			cat "$mail_file.errors" >> "$mail_file_temp"
 		fi
 	fi
@@ -260,7 +268,7 @@ compose_message() {
 		cat "$locker_stamp/stamps.news" >> "$locker_stamp/stamps"
 
 		if [ "$news" -gt 0 ]; then
-			echo -e "##### $heading_news #####" >> "$mail_file_temp"
+			format_header "$heading_news" >> "$mail_file_temp"
 			cat "$mail_file.news" >> "$mail_file_temp"
 		fi
 	fi
@@ -268,7 +276,7 @@ compose_message() {
 		cat "$locker_stamp/stamps.updates" >> "$locker_stamp/stamps"
 
 		if [ "$severity" -ge 3 ]; then
-			echo -e "##### $heading_updates #####" >> "$mail_file_temp"
+			format_header "$heading_updates" >> "$mail_file_temp"
 			cat "$mail_file.updates" >> "$mail_file_temp"
 		fi
 	fi
