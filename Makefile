@@ -12,11 +12,8 @@ update-langs:
 .po.mo:
 	msgfmt --output-file=$@ $<
 
-install: install_langs install_scripts install_aux
+install: install_langs install_scripts
 
-install_aux:
-	install -D -m 0644 src/user_notify.cron $(DESTDIR)/etc/cron.d/user_notify.cron
-	install -D -m 0644 src/user_notify.config $(DESTDIR)/etc/config/user_notify
 
 install_scripts:
 	install -d $(DESTDIR)/usr/bin
