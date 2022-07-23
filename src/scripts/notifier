@@ -160,9 +160,9 @@ schedule_restart() {
 
 	echo "reboot" | at -t "$wanted_time" 2> /dev/null
 	if [ "$lang" = "cs" ]; then
-		echo -e "Zařízení bude automaticky restartováno dne $($date_cmd '+%d. %m. %Y v %H:%M' -d "$wanted_time").\n" >> "$1"
+		echo -e "Zařízení bude automaticky restartováno dne $($date_cmd '+%d. %m. %Y v %H:%M %Z' -d "$wanted_time").\n" >> "$1"
 	else
-		echo -e "The device will be restarted automatically on $($date_cmd '+%A, %B %e at %I:%M %p' -d "$wanted_time").\n" >> "$1"
+		echo -e "The device will be restarted automatically on $($date_cmd '+%A, %B %e at %I:%M %p %Z' -d "$wanted_time").\n" >> "$1"
 	fi
 }
 
