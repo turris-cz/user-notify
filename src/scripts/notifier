@@ -17,14 +17,14 @@ mail_file="$locker_stamp/msg.mail"
 mail_file_temp="$locker_stamp/msg.mail.tmp"
 mail_stamp="sent_by_email"
 
-
 turris_email_domain='notify.turris.cz'
 mailpass_certapi_hostname='sentinel.turris.cz'
 mailpass_file='/etc/sentinel/mailpass'
 
-
 smtp_enabled=$(uci -q get user_notify.smtp.enable)
 mail_to=$(uci -q get user_notify.smtp.to)
+ntfy_url="$(uci -q get user_notify.ntfy.url)"
+ntfy_priority="$(uci -q get user_notify.ntfy.priority || echo high)"
 
 # set default value to 0 if not defined as well
 turris_smtp=$(uci -q get user_notify.smtp.use_turris_smtp)
@@ -174,6 +174,17 @@ format_header() {
     printf '%*s\n' "$length" '' | tr ' ' '='
 }
 
+ntfy() {
+	[ -n "$ntfy_url" ] || return
+	local title="$1"
+	local content="$2"
+	curl \
+		-H "Title: $title" \
+		-H "Priority: $ntfy_priority" \
+		-H "Tags: $ntfy_tag" \
+		-d "$content" \
+		"$ntfy_url"
+}
 
 compose_message() {
 	rm -rf "$mail_file"* > /dev/null 2>&1 || true
@@ -215,13 +226,24 @@ compose_message() {
 		msg_severity=$(cat "$msg_dir/severity")
 
 		case "$msg_severity" in
-			restart|error|update)
+			restart)
+				ntfy_tag="skull"
+				msg_suffix="${msg_severity}s"
+				;;
+			error)
+				ntfy_tag="rotating_light"
+				msg_suffix="${msg_severity}s"
+				;;
+			update)
+				ntfy_tag="loudspeaker"
 				msg_suffix="${msg_severity}s"
 				;;
 			news)
+				ntfy_tag="tada"
 				msg_suffix="$msg_severity"
 				;;
 			*)
+				ntfy_tag="facepalm"
 				echo "Unknown severity: $msg_severity" >&2
 				;;
 		esac
@@ -254,6 +276,7 @@ compose_message() {
 		if [ "$severity" -ge 1 ]; then
 			format_header "$heading_restart" >> "$mail_file_temp"
 			cat "$mail_file.restarts" >> "$mail_file_temp"
+			ntfy "$hostname: $heading_restart" "$(cat $msg_file)"
 		fi
 	fi
 	if [ -f "$mail_file.errors" ]; then
@@ -262,6 +285,7 @@ compose_message() {
 		if [ "$severity" -ge 2 ]; then
 			format_header "$heading_errors" >> "$mail_file_temp"
 			cat "$mail_file.errors" >> "$mail_file_temp"
+			ntfy "$hostname: $heading_errors" "$(cat $msg_file)"
 		fi
 	fi
 	if [ -f "$mail_file.news" ]; then
@@ -270,6 +294,7 @@ compose_message() {
 		if [ "$news" -gt 0 ]; then
 			format_header "$heading_news" >> "$mail_file_temp"
 			cat "$mail_file.news" >> "$mail_file_temp"
+			ntfy "$hostname: $heading_news" "$(cat $msg_file)"
 		fi
 	fi
 	if [ -f "$mail_file.updates" ]; then
@@ -278,6 +303,7 @@ compose_message() {
 		if [ "$severity" -ge 3 ]; then
 			format_header "$heading_updates" >> "$mail_file_temp"
 			cat "$mail_file.updates" >> "$mail_file_temp"
+			ntfy "$hostname: $heading_updates" "$(cat $msg_file)"
 		fi
 	fi
 
