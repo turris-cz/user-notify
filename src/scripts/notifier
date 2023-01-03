@@ -23,8 +23,10 @@ mailpass_file='/etc/sentinel/mailpass'
 
 smtp_enabled=$(uci -q get user_notify.smtp.enable)
 mail_to=$(uci -q get user_notify.smtp.to)
+ntfy_enabled="$(uci -q get user_notify.ntfy.enable || echo 0)"
 ntfy_url="$(uci -q get user_notify.ntfy.url)"
 ntfy_priority="$(uci -q get user_notify.ntfy.priority || echo high)"
+ntfy_limit="4000"
 
 # set default value to 0 if not defined as well
 turris_smtp=$(uci -q get user_notify.smtp.use_turris_smtp)
@@ -175,7 +177,10 @@ format_header() {
 }
 
 ntfy() {
-	[ -n "$ntfy_url" ] || return
+	if [ "$ntfy_enabled" -eq 0 ] || [ -z "$ntfy_url" ]; then
+		echo "ntfy not enabled."
+		return
+	fi
 	local title="$1"
 	local content="$2"
 	curl \
@@ -184,6 +189,16 @@ ntfy() {
 		-H "Tags: $ntfy_tag" \
 		-d "$content" \
 		"$ntfy_url"
+}
+
+elipse() {
+	len="$(wc -c "$1" | sed 's| .*||')"
+	if [ "$len" -ge "$2" ]; then
+		head -c "$(($2 - 5))" "$1" # ... and 2x \n
+		echo ...
+	else
+		cat "$1"
+	fi
 }
 
 compose_message() {
@@ -276,7 +291,7 @@ compose_message() {
 		if [ "$severity" -ge 1 ]; then
 			format_header "$heading_restart" >> "$mail_file_temp"
 			cat "$mail_file.restarts" >> "$mail_file_temp"
-			ntfy "$hostname: $heading_restart" "$(cat $msg_file)"
+			ntfy "$hostname: $heading_restart" "$(elipse $msg_file $ntfy_limit)"
 		fi
 	fi
 	if [ -f "$mail_file.errors" ]; then
@@ -285,7 +300,7 @@ compose_message() {
 		if [ "$severity" -ge 2 ]; then
 			format_header "$heading_errors" >> "$mail_file_temp"
 			cat "$mail_file.errors" >> "$mail_file_temp"
-			ntfy "$hostname: $heading_errors" "$(cat $msg_file)"
+			ntfy "$hostname: $heading_errors" "$(elipse $msg_file $ntfy_limit)"
 		fi
 	fi
 	if [ -f "$mail_file.news" ]; then
@@ -294,7 +309,7 @@ compose_message() {
 		if [ "$news" -gt 0 ]; then
 			format_header "$heading_news" >> "$mail_file_temp"
 			cat "$mail_file.news" >> "$mail_file_temp"
-			ntfy "$hostname: $heading_news" "$(cat $msg_file)"
+			ntfy "$hostname: $heading_news" "$(elipse $msg_file $ntfy_limit)"
 		fi
 	fi
 	if [ -f "$mail_file.updates" ]; then
@@ -303,7 +318,7 @@ compose_message() {
 		if [ "$severity" -ge 3 ]; then
 			format_header "$heading_updates" >> "$mail_file_temp"
 			cat "$mail_file.updates" >> "$mail_file_temp"
-			ntfy "$hostname: $heading_updates" "$(cat $msg_file)"
+			ntfy "$hostname: $heading_updates" "$(elipse $msg_file $ntfy_limit)"
 		fi
 	fi
 
