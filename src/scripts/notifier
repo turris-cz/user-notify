@@ -178,17 +178,20 @@ format_header() {
 
 ntfy() {
 	if [ "$ntfy_enabled" -eq 0 ] || [ -z "$ntfy_url" ]; then
-		echo "ntfy not enabled."
+		echo "notifier: ntfy not enabled." >&2
 		return
 	fi
+	[ ! -f "$msg_dir/$ntfy_stamp" ] || return
+
 	local title="$1"
-	local content="$2"
+	local content="$(elipse "$2" "$ntfy_limit")"
 	curl \
 		-H "Title: $title" \
 		-H "Priority: $ntfy_priority" \
 		-H "Tags: $ntfy_tag" \
 		-d "$content" \
-		"$ntfy_url"
+		"$ntfy_url" && \
+			touch "$msg_dir/$ntfy_stamp"
 }
 
 elipse() {
@@ -291,7 +294,7 @@ compose_message() {
 		if [ "$severity" -ge 1 ]; then
 			format_header "$heading_restart" >> "$mail_file_temp"
 			cat "$mail_file.restarts" >> "$mail_file_temp"
-			ntfy "$hostname: $heading_restart" "$(elipse $msg_file $ntfy_limit)"
+			ntfy "$hostname: $heading_restart" "$msg_file"
 		fi
 	fi
 	if [ -f "$mail_file.errors" ]; then
@@ -300,7 +303,7 @@ compose_message() {
 		if [ "$severity" -ge 2 ]; then
 			format_header "$heading_errors" >> "$mail_file_temp"
 			cat "$mail_file.errors" >> "$mail_file_temp"
-			ntfy "$hostname: $heading_errors" "$(elipse $msg_file $ntfy_limit)"
+			ntfy "$hostname: $heading_errors" "$msg_file"
 		fi
 	fi
 	if [ -f "$mail_file.news" ]; then
@@ -309,7 +312,7 @@ compose_message() {
 		if [ "$news" -gt 0 ]; then
 			format_header "$heading_news" >> "$mail_file_temp"
 			cat "$mail_file.news" >> "$mail_file_temp"
-			ntfy "$hostname: $heading_news" "$(elipse $msg_file $ntfy_limit)"
+			ntfy "$hostname: $heading_news" "$msg_file"
 		fi
 	fi
 	if [ -f "$mail_file.updates" ]; then
@@ -318,7 +321,7 @@ compose_message() {
 		if [ "$severity" -ge 3 ]; then
 			format_header "$heading_updates" >> "$mail_file_temp"
 			cat "$mail_file.updates" >> "$mail_file_temp"
-			ntfy "$hostname: $heading_updates" "$(elipse $msg_file $ntfy_limit)"
+			ntfy "$hostname: $heading_updates" "$msg_file"
 		fi
 	fi
 
