@@ -147,7 +147,8 @@ schedule_restart() {
 	local max_delay=10
 	local delay=$(uci -q get user_notify.reboot.delay)
 	local time=$(uci -q get user_notify.reboot.time | tr -d ':')
-	local curr_time=$($date_cmd '+%H%M')
+	local curr_unixtime=$($date_cmd '+%s')
+	local curr_time=$($date_cmd '+%H%M' -d @$curr_unixtime)
 
 	if [ "$delay" -gt "$max_delay" ]; then
 		delay=$max_delay
@@ -157,8 +158,9 @@ schedule_restart() {
 		delay=1
 	fi
 
-	local curr_date=$($date_cmd '+%y%m%d')
-	local wanted_time=$($date_cmd '+%y%m%d%H%M' -d "$((curr_date + delay))$time")
+	local delay_sec=$((delay * 24 * 60 * 60))
+	local wanted_day=$($date_cmd '+%y%m%d' -d "@$((curr_unixtime + delay_sec))")
+	local wanted_time=$($date_cmd '+%y%m%d%H%M' -d "$wanted_day$time")
 
 	echo "reboot" | at -t "$wanted_time" 2> /dev/null
 	if [ "$lang" = "cs" ]; then
