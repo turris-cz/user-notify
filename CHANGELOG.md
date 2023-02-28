@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [61.6.2] - 2023-02-28
+- fix reboot scheduling at the end of the month
+
 ## [61.6.1] - 2023-01-11
 - limit number of characters for ntfy.sh to 4000
 - make sure we send ntfy.sh notification only once
