@@ -330,6 +330,7 @@ compose_message() {
 		echo "To: $(echo $mail_to | sed 's/ /, /')" > "$mail_file"
 		echo "From: $mail_from" >> "$mail_file"
 		echo "Content-Type: text/plain; charset=UTF-8" >> "$mail_file"
+		echo "Content-Transfer-Encoding: 8bit" >> "$mail_file"
 		echo "Date: $curr_date" >> "$mail_file"
 		echo "Message-ID: $msg_id" >> "$mail_file"
 		echo -e "Subject: $mail_subject\n" >> "$mail_file"
