@@ -216,8 +216,7 @@ compose_message() {
 	local curr_date=`$date_cmd -R`
 	local date_time=`$date_cmd +'%y%m%d.%H%M%S'`
 	local rand=`tr -dc A-Za-z0-9 < /dev/urandom 2>/dev/null | head -c8`
-	local domain=`uci -q get user_notify.smtp.from | cut -d '@' -f2`
-	local msg_id="<$date_time.$rand@$domain>"
+	local msg_id="<${date_time}.${rand}@${turris_email_domain}>"
 	local hostname=`cat /proc/sys/kernel/hostname`
 	if [ "$lang" = "cs" ]; then
 		local mail_subject="=?utf-8?Q?Upozorn=C4=9Bn=C3=AD?= od =?utf-8?Q?Va=C5=A1eho?= routeru $hostname"
