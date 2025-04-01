@@ -58,7 +58,7 @@ while getopts "htd:s:" OPT; do
 
 		s)
 			severity="$OPTARG"
-			[ "$severity" = "restart" -o "$severity" = "error" -o "$severity" = "update" -o "$severity" = "news" ] || {
+			[ "$severity" = "restart" -o "$severity" = "error" -o "$severity" = "update" -o "$severity" = "news" -o "$severity" = "test" ] || {
 				echo "$SCRIPTNAME: Unknown notification severity: $severity" >&2
 				echo "$USAGE" >&2
 				exit 1

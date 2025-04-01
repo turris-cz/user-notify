@@ -224,12 +224,14 @@ compose_message() {
 		local heading_errors="Oznámení o chybách"
 		local heading_updates="Oznámení o aktualizacích"
 		local heading_news="Oznámení o novinkách"
+		local heading_test="Testovací oznámení"
 	else
 		local mail_subject="Notification from your router $hostname"
 		local heading_restart="Restart is needed"
 		local heading_errors="Error notifications"
 		local heading_updates="Update notifications"
 		local heading_news="News announcements"
+		local heading_test="Test notifications"
 	fi
 
 	local msg msg_dir msg_suffix msg_severity msg_file
@@ -259,7 +261,11 @@ compose_message() {
 				;;
 			news)
 				ntfy_tag="tada"
-				msg_suffix="$msg_severity"
+				msg_suffix="${msg_severity}"
+				;;
+			test)
+				ntfy_tag="test_tube"
+				msg_suffix="${msg_severity}"
 				;;
 			*)
 				ntfy_tag="facepalm"
@@ -315,6 +321,12 @@ compose_message() {
 			cat "$mail_file.news" >> "$mail_file_temp"
 			ntfy "$hostname: $heading_news" "$msg_file"
 		fi
+	fi
+	if [ -f "$mail_file.test" ]; then
+		cat "$locker_stamp/stamps.test" >> "$locker_stamp/stamps"
+		format_header "$heading_test" >> "$mail_file_temp"
+		cat "$mail_file.test" >> "$mail_file_temp"
+		ntfy "$hostname: $heading_test" "$msg_file"
 	fi
 	if [ -f "$mail_file.updates" ]; then
 		cat "$locker_stamp/stamps.updates" >> "$locker_stamp/stamps"
