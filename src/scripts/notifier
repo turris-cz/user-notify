@@ -29,6 +29,7 @@ ntfy_enabled="$(uci -q get user_notify.ntfy.enable || echo 0)"
 ntfy_url="$(uci -q get user_notify.ntfy.url)"
 ntfy_priority="$(uci -q get user_notify.ntfy.priority || echo high)"
 ntfy_limit="4000"
+ntfy_stamp="sent_by_ntfy"
 
 # set default value to 0 if not defined as well
 turris_smtp=$(uci -q get user_notify.smtp.use_turris_smtp)
@@ -182,10 +183,12 @@ ntfy() {
 		echo "notifier: ntfy not enabled." >&2
 		return
 	fi
-	[ ! -f "$msg_dir/$ntfy_stamp" ] || return
 
+	local msg_dir="$(dirname "$2")"
 	local title="$1"
+	[ ! -f "$msg_dir/$ntfy_stamp" ] || return
 	local content="$(elipse "$2" "$ntfy_limit")"
+
 	curl \
 		-H "Title: $title" \
 		-H "Priority: $ntfy_priority" \
@@ -233,7 +236,7 @@ compose_message() {
 		local heading_test="Test notifications"
 	fi
 
-	local msg msg_dir msg_suffix msg_severity msg_file
+	local msg msdg_dir msg_suffix msg_severity msg_file
 	for msg_dir in "$base_folder"/*; do
 		msg="${msg_dir##*/}"
 		# if not a message dir
