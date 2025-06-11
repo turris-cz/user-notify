@@ -18,6 +18,8 @@ mail_file_temp="$locker_stamp/msg.mail.tmp"
 mail_stamp="sent_by_email"
 
 turris_email_domain='notify.turris.cz'
+turris_smtp_server="smtp.turris.cz"
+turris_smtp_port="465"
 mailpass_certapi_hostname='sentinel.turris.cz'
 mailpass_file='/etc/sentinel/mailpass'
 
@@ -92,12 +94,9 @@ get_turris_smtp_settings() {
 	username="${sn}@${turris_email_domain}"
 	password=$(get_turris_password) || exit 3
 
-	local server="smtp.turris.cz"
-	local port="465"
-
 	echo "from $mail_from"
-	echo "host $server"
-	echo "port $port"
+	echo "host $turris_smtp_server"
+	echo "port $turris_smtp_port"
 	echo "tls on"
 	echo "tls_starttls off"
 	echo "tls_certcheck on"
@@ -397,6 +396,10 @@ send_mail() {
 		create_msmtp_config
 		msmtp -C "$msmtp_cfg_file" -t < "$mail_file" || {
 			echo "notifier: msmtp has failed to send e-mail notification" >&2
+			if [ "${turris_smtp:=0}" = '1' ] && ping -c 1 "$turris_smtp_server" > /dev/null 2>&1; then
+				rm -f "$mailpass_file"
+				generate_turris_password
+			fi
 			exit 2
 		}
 	fi
