@@ -172,10 +172,10 @@ schedule_restart() {
 
 
 format_header() {
-    local header="$1"
-    local length="${#header}"
-    echo "$header"
-    printf '%*s\n' "$length" '' | tr ' ' '='
+	local header="$1"
+	local length="${#header}"
+	echo "$header"
+	printf '%*s\n' "$length" '' | tr ' ' '='
 }
 
 ntfy() {
