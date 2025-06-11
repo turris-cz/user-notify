@@ -9,8 +9,8 @@ default_lang='en'
 SCRIPTNAME="$(basename "$0")"
 USAGE="Usage:
     $SCRIPTNAME -h
-    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'message'
-    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news) 'msg_cs' 'msg_en'"
+    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news|test) 'message'
+    $SCRIPTNAME [-t] [-d base_dir] -s (restart|error|update|news|test) 'msg_cs' 'msg_en'"
 
 HELP="$USAGE
 
@@ -21,7 +21,7 @@ Arguments:
     -t      Send notification immediately (triggers notifier script)
     -b base_dir
             Directory for notifications (defaults to '$base_dir')
-    -s (restart|error|update|news)
+    -s (restart|error|update|news|test)
             Type of a notification message
     message
             Notification text
@@ -37,7 +37,7 @@ Examples:
         $ create_notification -s news 'Hello world!'
 
     Create and send testing notification immediately
-        $ create_notification -t -s error 'This is a testing notification'
+        $ create_notification -t -s test 'This is a testing notification'
 "
 
 
