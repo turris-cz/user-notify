@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [62.1.0] - 2025-06-18
+- force password refresh when unable to connect to Turris mail server
+- make sure we send ntfy.sh notification only once (this time for real)
+
 ## [62.0.0] - 2025-04-17
 - add test notification
 
