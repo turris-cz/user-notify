@@ -236,7 +236,7 @@ compose_message() {
 		local heading_test="Test notifications"
 	fi
 
-	local msg msdg_dir msg_suffix msg_severity msg_file
+	local msg msg_dir msg_suffix msg_severity msg_file
 	for msg_dir in "$base_folder"/*; do
 		msg="${msg_dir##*/}"
 		# if not a message dir
